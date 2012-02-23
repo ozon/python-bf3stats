@@ -11,8 +11,7 @@ Code example?
 -------------
 ```python
 import bf3stats
-
 bf3stats = bf3stats.api()
-# get a dict short stats of player O2ON
+# get a dict with short stats of player O2ON
 result = bf3stats.player('O2ON')
 ```
