@@ -121,9 +121,15 @@ class API(object):
         # the code would be the same as playerupdate - let reuse this function
         return self.playerupdate(player_name, data_group='playerlookup')
 
-    def setupkey(self):
+    def setupkey(self, client_ident, name):
         """Generate an individual client key for every installation"""
-        raise NotImplementedError, 'setupkey function is not implemented'
+        post_data = {
+                'ident': self._ident,
+                'time': int(time.time()),
+                'clientident': client_ident,
+                'name': name
+                }
+        return self._request(post_data, data_group='setupkey', plattform='global', sign=True)
 
     def getkey(self, client_ident):
         """"Get information about a existing client key or your own key."""
