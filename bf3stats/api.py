@@ -125,8 +125,12 @@ class API(object):
         """Generate an individual client key for every installation"""
         raise NotImplementedError, 'setupkey function is not implemented'
 
-    def getkey(self):
+    def getkey(self, client_ident):
         """"Get information about a existing client key or your own key."""
-        raise NotImplementedError, 'getkey function is not implemented'
-
+        post_data = {
+                'ident': self._ident,
+                'time': int(time.time()),
+                'clientident': client_ident,
+                }
+        return self._request(post_data, data_group='getkey', plattform='global', sign=True)
 
