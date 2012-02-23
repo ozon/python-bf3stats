@@ -13,8 +13,15 @@ Code example?
 import bf3stats
 bf3stats = bf3stats.api()
 # show count of online players
-result = bf3stats.onlinestats()
+bf3stats.onlinestats()
+```
+Should show:
+``` {u'360': 18166, u'pc': 38419, u'ps3': 40362, u'status': u'ok'} ```
 
+```python
+import bf3stats
+bf3stats = bf3stats.api()
 # get a dict with short stats of player O2ON
 result = bf3stats.player('O2ON')
 ```
+Look in result ;)
