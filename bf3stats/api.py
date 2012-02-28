@@ -22,6 +22,8 @@ import base64
 import hashlib
 import hmac
 
+from bf3stats.datagroups import Onlinestats, Player
+
 try:
     # python version 2.6 or newer
     import json
@@ -91,15 +93,18 @@ class API(object):
                 'player' : player_name,
                 'opt' : parts
                 }
-        return self._request(post_data, data_group='player')
+        res = self._request(post_data, data_group='player')
+        return Player._parse(res)
 
     def dogtags(self, player_name):
-        """Request player dogtags"""
+        """Request Player dogtags"""
         return self._request(post_data = {'player': player_name}, data_group='dogtags')
 
     def onlinestats(self):
         """Count of online players"""
-        return self._request(post_data={}, data_group='onlinestats', plattform='global')
+        res =  self._request(post_data={}, data_group='onlinestats', plattform='global')
+        return Onlinestats._parse(res)
+
 
     def playerupdate(self, player_name, data_group='playerupdate'):
         """Request a playerupdate. (signed request)
