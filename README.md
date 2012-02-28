@@ -15,13 +15,14 @@ bf3stats = bf3stats.api()
 # show count of online players
 bf3stats.onlinestats()
 ```
-Should show:
-``` {u'360': 18166, u'pc': 38419, u'ps3': 40362, u'status': u'ok'} ```
+Should show a dict:
+``` {360: 18166, pc: 38419, ps3: 40362, u'status': u'ok'} ```
+Or use the object ``` _onlinestats = bf3stats.onlinestats() ``` and access the values with ``` _onlinestats.pc ```.
 
 ```python
 import bf3stats
 bf3stats = bf3stats.api()
 # get a dict with short stats of player O2ON
-result = bf3stats.player('O2ON')
+_player = bf3stats.player('O2ON')
 ```
-Look in result ;)
+Look in the _player dict/object ;)
