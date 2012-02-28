@@ -22,7 +22,7 @@ import base64
 import hashlib
 import hmac
 
-from bf3stats.datagroups import Onlinestats, Player
+from bf3stats.utils import _to_str
 
 try:
     # python version 2.6 or newer
@@ -70,7 +70,7 @@ class API(object):
             raw_data = json.loads(result)
         except IOError, err:
             raw_data = {'status' : 'error', 'error': err}
-        return raw_data
+        return objDict(raw_data)
 
     def _sign(self, data_dict):
         """Sign data for a signed request"""
@@ -93,8 +93,7 @@ class API(object):
                 'player' : player_name,
                 'opt' : parts
                 }
-        res = self._request(post_data, data_group='player')
-        return Player._parse(res)
+        return self._request(post_data, data_group='player')
 
     def dogtags(self, player_name):
         """Request Player dogtags"""
@@ -102,8 +101,7 @@ class API(object):
 
     def onlinestats(self):
         """Count of online players"""
-        res =  self._request(post_data={}, data_group='onlinestats', plattform='global')
-        return Onlinestats._parse(res)
+        return  self._request(post_data={}, data_group='onlinestats', plattform='global')
 
 
     def playerupdate(self, player_name, data_group='playerupdate'):
@@ -144,4 +142,22 @@ class API(object):
                 'clientident': client_ident,
                 }
         return self._request(post_data, data_group='getkey', plattform='global', sign=True)
+
+
+class objDict(object):
+    '''The recursive class for building and representing objects with.'''
+    # http://stackoverflow.com/questions/1305532/convert-python-dict-to-object
+
+    def __init__(self, obj):
+        for k, v in obj.iteritems():
+            if isinstance(v, dict):
+                setattr(self, _to_str(k).title(), objDict(v))
+            else:
+                setattr(self, k, v)
+
+    def __getitem__(self, val):
+        return self.__dict__[val]
+
+    def __repr__(self):
+        return '{%s}' % str(', '.join('%s : %s' % (k, repr(v)) for (k, v) in self.__dict__.iteritems()))
 
