@@ -5,6 +5,5 @@ __version__ = '0.99'
 __author__ = 'Harry Gabriel'
 __license__ = 'GPLv2'
 
-from bf3stats.api import API
+from bf3stats.api import API as api
 
-api = API()
