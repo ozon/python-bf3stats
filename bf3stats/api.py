@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
+import sys
 import urllib
 import time
 import base64
@@ -24,16 +24,11 @@ import hmac
 
 from bf3stats.utils import _to_str
 
-try:
-    # python version 2.6 or newer
+if sys.version_info[:2] < (2, 6):
+    import simplejson as json
+else:
     import json
-except ImportError:
-    try:
-        # older python versions
-        import simplejson as json
-    except ImportError:
-        # Houston, we have a problem
-        raise ImportError, 'Unable to load a json library'
+
 
 class API(object):
     """A python interface for the bf3stats.com API"""
@@ -48,10 +43,8 @@ class API(object):
         # can be pc, 360 or ps3
         self._plattform = plattform
         # ident and secret for signed requests
-        if ident:
-            self._ident = ident
-        if secret:
-            self._secret = secret
+        self._ident = ident
+        self._secret = secret
 
     def _request(self, post_data, data_group, sign=False, plattform=None):
         """Access bfstats.com API via HTTP POST"""
@@ -74,11 +67,15 @@ class API(object):
 
     def _sign(self, data_dict):
         """Sign data for a signed request"""
+        assert self._can_do_signed_requests(), "You must provide an ident and secret_key to call this function. See http://bf3stats.com/api"
         data = base64.urlsafe_b64encode(json.dumps(data_dict)).rstrip('=')
         sig = base64.urlsafe_b64encode(
                 hmac.new(self._secret, msg=data, digestmod=hashlib.sha256).digest()
                 ).rstrip('=')
         return { 'data': data, 'sig': sig }
+
+    def _can_do_signed_requests(self):
+        return self._ident and self._secret
 
     # reimplement bf3stats.com JSON API
     # Method names taken from the documentation
@@ -104,7 +101,7 @@ class API(object):
         return  self._request(post_data={}, data_group='onlinestats', plattform='global')
 
 
-    def playerupdate(self, player_name, data_group='playerupdate'):
+    def playerupdate(self, player_name):
         """Request a playerupdate. (signed request)
 
         bf3stats.com request the current data from EA for this player.
@@ -117,14 +114,18 @@ class API(object):
                 'time': int(time.time()),
                 'player': player_name
                 }
-        return self._request(post_data, data_group, sign=True)
+        return self._request(post_data, data_group='playerupdate', sign=True)
 
     def playerlookup(self, player_name):
         """Lookup a player. (signed request)"""
-        # the code would be the same as playerupdate - let reuse this function
-        return self.playerupdate(player_name, data_group='playerlookup')
+        post_data = {
+            'ident': self._ident,
+            'time': int(time.time()),
+            'player': player_name
+        }
+        return self._request(post_data, data_group='playerlookup', sign=True)
 
-    def setupkey(self, client_ident, name):
+    def setupkey(self, client_ident=None, name=None):
         """Generate an individual client key for every installation"""
         post_data = {
                 'ident': self._ident,
@@ -145,7 +146,7 @@ class API(object):
 
 
 class objDict(object):
-    '''The recursive class for building and representing objects with.'''
+    """The recursive class for building and representing objects with."""
     # http://stackoverflow.com/questions/1305532/convert-python-dict-to-object
 
     def __init__(self, obj):
